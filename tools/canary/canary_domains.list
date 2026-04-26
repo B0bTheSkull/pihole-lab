@@ -1,0 +1,30 @@
+# Canary (honey) domains. None of these are real services.
+# Goal: nothing on the LAN should ever query these. Any query is
+# a configuration leak, a misclick, or a compromised host.
+#
+# They live in Pi-hole's local DNS so they resolve to RFC1918 nowhere
+# and show up in the query log attributed to the client that asked.
+#
+# Naming convention: <prefix>.canary.<lab-domain>
+# Pick names that look juicy — an attacker poking at /etc/hosts or
+# browser history should be tempted to reach for them.
+#
+# Add new ones whenever you launch a new internal service or VLAN;
+# put one canary per "interesting" name a real service would have.
+
+# Internal-looking infra
+admin-portal.canary.lan
+backup-nas.canary.lan
+ci-runner.canary.lan
+dev-jumpbox.canary.lan
+internal-grafana.canary.lan
+secret-mgr.canary.lan
+
+# Cloud-looking honey
+aws-prod-bucket.canary.lan
+gcp-secrets.canary.lan
+vault-prod.canary.lan
+
+# Looks-like-a-mistake names that get picked up by typo-squat scanners
+piehole.canary.lan
+admln.canary.lan

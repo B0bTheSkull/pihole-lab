@@ -1,0 +1,94 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "title": "Pi-hole — DNS overview",
+  "tags": ["pihole", "dns", "homelab"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {"from": "now-24h", "to": "now"},
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Queries (last 24h)",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "pihole_dns_queries_today", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Blocked (last 24h)",
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "pihole_ads_blocked_today", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "short", "color": {"mode": "fixed", "fixedColor": "red"}}}
+    },
+    {
+      "id": 3,
+      "type": "gauge",
+      "title": "Block %",
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "pihole_ads_percentage_today", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 20}, {"color": "red", "value": 50}]}}}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Domains on blocklist",
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "pihole_domains_being_blocked", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Queries per second",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "targets": [
+        {"expr": "rate(pihole_dns_queries_today[5m])", "refId": "A", "legendFormat": "queries/s"},
+        {"expr": "rate(pihole_ads_blocked_today[5m])", "refId": "B", "legendFormat": "blocked/s"}
+      ]
+    },
+    {
+      "id": 6,
+      "type": "piechart",
+      "title": "Reply types (last hour)",
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+      "targets": [{"expr": "pihole_query_by_type", "refId": "A", "legendFormat": "{{type}}"}]
+    },
+    {
+      "id": 7,
+      "type": "bargauge",
+      "title": "Top clients (queries today)",
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+      "targets": [{"expr": "topk(10, pihole_top_sources)", "refId": "A", "legendFormat": "{{source}}"}]
+    },
+    {
+      "id": 8,
+      "type": "bargauge",
+      "title": "Top blocked domains",
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+      "targets": [{"expr": "topk(10, pihole_top_ads)", "refId": "A", "legendFormat": "{{domain}}"}]
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "Pi-hole status",
+      "gridPos": {"x": 0, "y": 20, "w": 6, "h": 4},
+      "targets": [{"expr": "pihole_status", "refId": "A"}],
+      "fieldConfig": {"defaults": {"mappings": [{"type": "value", "options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}}}]}}
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Unique clients seen",
+      "gridPos": {"x": 6, "y": 20, "w": 18, "h": 4},
+      "targets": [{"expr": "pihole_unique_clients", "refId": "A", "legendFormat": "clients"}]
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+# DoH / DoT endpoint blocklist for Pi-hole
+# Add via: pihole -b -nr -domainonly $(grep -v '^#' blocklist_doh_dot.txt | grep -v '^$')
+# or import as a custom adlist (one host per line)
+#
+# Sources: NextDNS public list, curl wiki DNS-over-HTTPS server list,
+# and operator observation of the major commercial DoH/DoT providers.
+#
+# A device that hardcodes any of these is *deliberately* trying to
+# bypass network-level DNS policy. Block them, then watch the query
+# log to see who's trying.
+
+# --- Cloudflare ---
+cloudflare-dns.com
+mozilla.cloudflare-dns.com
+1dot1dot1dot1.cloudflare-dns.com
+one.one.one.one
+chrome.cloudflare-dns.com
+dns.cloudflare.com
+
+# --- Google ---
+dns.google
+dns.google.com
+8888.google
+public-dns-a.google.com
+public-dns-b.google.com
+
+# --- Quad9 ---
+dns.quad9.net
+dns9.quad9.net
+dns10.quad9.net
+dns11.quad9.net
+dns.quad9.com
+
+# --- NextDNS ---
+dns.nextdns.io
+anycast.dns.nextdns.io
+
+# --- AdGuard ---
+dns.adguard.com
+dns.adguard-dns.com
+dns-family.adguard.com
+unfiltered.adguard-dns.com
+
+# --- OpenDNS / Cisco Umbrella ---
+doh.opendns.com
+doh.familyshield.opendns.com
+doh.umbrella.com
+
+# --- CleanBrowsing ---
+doh.cleanbrowsing.org
+
+# --- Apple Private Relay (DoH-ish telemetry path) ---
+mask.icloud.com
+mask-h2.icloud.com
+mask-api.icloud.com
+
+# --- Mozilla DoH bootstrap (Firefox "Use Cloudflare" toggle) ---
+use-application-dns.net
+
+# --- Misc commercial DoH ---
+doh.ffmuc.net
+dns.dnswarden.com
+doh.libredns.gr
+doh.rubyfish.cn
+doh.tiar.app
+doh.tiarap.org
+doh.crypto.sx
+ibksturm.synology.me
+jp.tiar.app
+doh.pub
+doh.360.cn
+dns.alidns.com
+dns.dnshome.de
+ordns.he.net
+rdns.faelix.net
+doh.dnslify.com
+dns.digitale-gesellschaft.ch

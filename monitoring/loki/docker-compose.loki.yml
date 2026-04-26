@@ -1,0 +1,28 @@
+# Compose overlay that adds Loki + Promtail to the monitoring stack.
+#
+# Bring up alongside the main stack:
+#   docker compose -f docker-compose.yml -f loki/docker-compose.loki.yml up -d
+#
+# Promtail must run on the *Pi-hole host* (where the logs live).
+# This compose file therefore ships only Loki here; promtail is
+# deployed separately on the Pi using `promtail-config.yml`.
+
+services:
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  # Auto-add Loki as a Grafana datasource via provisioning.
+  grafana:
+    volumes:
+      - ./loki/grafana-loki-datasource.yml:/etc/grafana/provisioning/datasources/loki.yml:ro
+
+volumes:
+  loki_data:

@@ -1,0 +1,74 @@
+# Promtail config for the Pi-hole host. Tails:
+#   /var/log/pihole/pihole.log     — query log (dnsmasq format)
+#   /var/log/pihole/FTL.log         — FTL daemon log
+#   /var/log/syslog                 — for cross-correlation
+#   /var/log/suricata/eve.json      — if Suricata is on the same host
+#
+# Install: download promtail binary onto the Pi, drop this in
+# /etc/promtail/promtail.yml, run as a systemd service.
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /var/lib/promtail/positions.yaml
+
+clients:
+  # Update to point at your Loki host. If Loki is on a different
+  # box (recommended), make sure UFW lets the Pi reach 3100/tcp.
+  - url: http://10.0.0.X:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: pihole-queries
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: pihole
+          stream: queries
+          host: pihole
+          __path__: /var/log/pihole/pihole.log
+    pipeline_stages:
+      # Example dnsmasq line:
+      # Apr 26 18:02:14 dnsmasq[123]: query[A] github.com from 10.0.0.42
+      - regex:
+          expression: '^(?P<time>\S+\s+\S+\s+\S+)\s+dnsmasq\[\d+\]:\s+(?P<event>query|reply|forwarded|cached|gravity blocked)\S*\s+(?P<detail>.*)$'
+      - labels:
+          event:
+      - timestamp:
+          source: time
+          format: 'Jan _2 15:04:05'
+          location: Local
+
+  - job_name: pihole-ftl
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: pihole
+          stream: ftl
+          host: pihole
+          __path__: /var/log/pihole/FTL.log
+
+  - job_name: syslog
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: syslog
+          host: pihole
+          __path__: /var/log/syslog
+
+  - job_name: suricata-eve
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: suricata
+          host: pihole
+          __path__: /var/log/suricata/eve.json
+    pipeline_stages:
+      - json:
+          expressions:
+            event_type: event_type
+            src_ip: src_ip
+            dest_ip: dest_ip
+      - labels:
+          event_type:

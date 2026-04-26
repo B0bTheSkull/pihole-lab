@@ -1,0 +1,27 @@
+# Live config exports — keep local, may contain hashed secrets
+configs/*.live
+configs/*.bak
+configs/pihole-FTL.db
+configs/teleporter*.tar.gz
+**/pihole-FTL.db
+**/eve.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Monitoring secrets
+monitoring/.env
+
+# Local-only IP-to-name mapping (privacy)
+tools/device_profile/names.json
+
+# Promtail state
+*positions.yaml
+
+# Generated reports
+docs/03-analysis-device-table.md
+**/*.csv
+**/today.tsv

@@ -1,0 +1,63 @@
+# Pi-hole observability stack.
+#
+# Runs anywhere with Docker — does NOT need to be on the Pi itself.
+# Recommended: run it on a separate host so a Pi reboot doesn't take
+# the dashboards down with it.
+#
+# Bring up:   docker compose up -d
+# URLs:       Grafana   http://<host>:3000  (admin / admin first login)
+#             Prom      http://<host>:9090
+#             Exporter  http://<host>:9617/metrics
+
+services:
+  pihole-exporter:
+    image: ekofr/pihole-exporter:latest
+    container_name: pihole-exporter
+    restart: unless-stopped
+    environment:
+      # Point at the Pi-hole. PIHOLE_PASSWORD is the *web admin*
+      # password (or set PIHOLE_API_TOKEN if you've issued an app token).
+      PIHOLE_HOSTNAME: ${PIHOLE_HOST:-10.0.0.163}
+      PIHOLE_PASSWORD: ${PIHOLE_PASSWORD:?set PIHOLE_PASSWORD in .env}
+      PIHOLE_PORT: "80"
+      INTERVAL: "30s"
+      PORT: "9617"
+    ports:
+      - "9617:9617"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=30d
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - pihole-exporter
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:

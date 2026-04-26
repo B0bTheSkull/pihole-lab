@@ -1,0 +1,49 @@
+# Drop-in snippet for /etc/suricata/suricata.yaml on the Pi (or a
+# separate sensor with a SPAN port to the LAN). This is just the
+# bits that need to change from the Debian default — you keep the
+# rest of suricata.yaml as-is.
+#
+# Goal: emit eve.json with at least flow + dns + alert events so we
+# can correlate them against pihole-FTL.db queries.
+
+# 1. Listen on the LAN interface — adjust to your NIC.
+af-packet:
+  - interface: eth0
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+    use-mmap: yes
+    tpacket-v3: yes
+
+# 2. Output. eve.json is the only one we need for correlation.
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: /var/log/suricata/eve.json
+      types:
+        - alert:
+            payload: yes
+            payload-printable: yes
+            packet: yes
+        - dns:
+            query: yes
+            answer: yes
+        - http:
+            extended: yes
+        - tls:
+            extended: yes
+        - flow
+
+# 3. Pi-hole sits in the same machine, so localhost DNS chatter
+#    will dominate the dns-eve log unless we filter it. A
+#    bpf-filter at af-packet level keeps the firehose manageable.
+#    Comment out if Suricata is on a separate sensor.
+# bpf-filter: "not (host 127.0.0.1 and port 53)"
+
+# 4. Rule sources we care about for blue-team:
+#    - emerging-threats free
+#    - abuse.ch SSL blacklist
+#    - sslbl-ja3 fingerprints
+# Drop these into /etc/suricata/update.yaml under "sources" and run
+# `suricata-update`.
