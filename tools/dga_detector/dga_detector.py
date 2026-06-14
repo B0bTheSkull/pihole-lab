@@ -92,7 +92,6 @@ _BIGRAM_LOG = {
     "tl": -3.27, "ny": -3.28, "ki": -3.29, "rk": -3.30, "ys": -3.31,
 }
 _BIGRAM_FLOOR = -4.5  # fall-back log10 for unseen bigrams
-_BASE_LL_RANGE = (_BIGRAM_FLOOR, max(_BIGRAM_LOG.values()))  # ~(-4.5, -1.10)
 
 # --- public-suffix-ish trim. Good enough for triage; not a real PSL. ---------
 _COMMON_TLDS = {
@@ -159,11 +158,9 @@ def score(label: str) -> dict[str, float]:
     # Entropy: typical English ~3.0–3.6; DGAs ~3.7–4.5.
     ent_n = min(1.0, max(0.0, (ent - 2.7) / 1.8))
 
-    # Bigram LL: more negative => more suspicious. Map [-4.5..-1.5] -> [1..0].
-    lo, hi = _BASE_LL_RANGE
-    ll_n = min(1.0, max(0.0, (lo - ll) / (lo - hi))) if hi != lo else 0.0
-    # invert: lower (more negative) ll => higher suspicion
-    ll_n = 1.0 - ll_n
+    # Bigram LL: more negative => more suspicious.
+    # Map ll in [_BIGRAM_FLOOR .. -1.5] -> [1 .. 0] (clamped):
+    # ll == -1.5 (looks like English) -> 0, ll == _BIGRAM_FLOOR -> 1.
     ll_n = min(1.0, max(0.0, (-1.5 - ll) / (-1.5 - _BIGRAM_FLOOR)))
 
     # Length: 12+ is suspicious; <8 is fine.

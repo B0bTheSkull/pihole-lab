@@ -11,7 +11,7 @@
 
 services:
   pihole-exporter:
-    image: ekofr/pihole-exporter:latest
+    image: ekofr/pihole-exporter:v1.0.0
     container_name: pihole-exporter
     restart: unless-stopped
     environment:
@@ -26,7 +26,7 @@ services:
       - "9617:9617"
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.53.0
     container_name: prometheus
     restart: unless-stopped
     volumes:
@@ -42,7 +42,7 @@ services:
       - pihole-exporter
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.1.0
     container_name: grafana
     restart: unless-stopped
     environment:
